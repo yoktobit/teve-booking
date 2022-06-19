@@ -1,30 +1,19 @@
 package main
 
 import (
-	"context"
-	"log"
-
-	proto "gitlab.com/gitlab-org/project-templates/go-micro/proto"
-	"github.com/micro/go-micro"
+	"github.com/gin-gonic/gin"
+	"windolph.org/teve/db"
 )
 
-type Greeter struct{}
-
-func (g *Greeter) Hello(ctx context.Context, req *proto.HelloRequest, rsp *proto.HelloResponse) error {
-	rsp.Greeting = "Hello " + req.Name
-	return nil
-}
-
 func main() {
-	service := micro.NewService(
-		micro.Name("greeter"),
-	)
 
-	service.Init()
+	connection := db.Connect()
+	db.CheckMigration(connection)
 
-	proto.RegisterGreeterHandler(service.Server(), new(Greeter))
+	r := gin.Default()
+	r.GET("event", func(ctx *gin.Context) {
+		ctx.Status(200)
+	})
+	r.Run()
 
-	if err := service.Run(); err != nil {
-		log.Fatal(err)
-	}
 }
